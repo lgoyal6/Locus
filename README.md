@@ -34,7 +34,7 @@ The only two human inputs are **map clicks** (claim a grid cell for a team) and 
 
 ```mermaid
 flowchart TB
-    subgraph FE["Frontend (src/ — React + Mapbox)"]
+    subgraph FE["Frontend (src/ - React + Mapbox)"]
         App["App.tsx · shell"]
         MapView["MapView · heatmap · grid · markers"]
         Console["voice/CommandConsole"]
@@ -159,7 +159,7 @@ the master plan.
 git clone https://github.com/Da0t/Locus.git && cd Locus
 git checkout <your-branch>        # e.g. person-a-sim
 npm install
-npx convex dev                    # terminal 1 — pick "start without an account" (local) or log in
+npx convex dev                    # terminal 1 - pick "start without an account" (local) or log in
 npm run dev                       # terminal 2 (or let `npm run dev` drive both)
 ```
 
