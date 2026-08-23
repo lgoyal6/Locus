@@ -1,7 +1,7 @@
-# PERSON C — Intelligence (LLM agents via Respan)
+# PERSON C - Intelligence (LLM agents via Respan)
 
-**Mission:** the event clock. When a tip or voice command arrives, LLMs —
-and only then — reason: a judge scores tip credibility, four hypothesis
+**Mission:** the event clock. When a tip or voice command arrives, LLMs  - 
+and only then - reason: a judge scores tip credibility, four hypothesis
 agents re-weight who the missing person probably is, and a parser turns
 spoken text into typed intents. All calls through the Respan gateway.
 Your work is why the reasoning panel and the voice console feel alive.
@@ -24,7 +24,7 @@ commands. If you ever find yourself calling an LLM from a tick, stop.
 
 ---
 
-## Task 1 — Wire the Agent component + Respan gateway
+## Task 1 - Wire the Agent component + Respan gateway
 
 1. Create `convex/convex.config.ts`:
    ```ts
@@ -47,27 +47,27 @@ commands. If you ever find yourself calling an LLM from a tick, stop.
    Env via `npx convex env set RESPAN_API_KEY …` (+ `RESPAN_BASE_URL`,
    `RESPAN_MODEL`). **At check-in, confirm with the Respan folks:** exact
    base path (`/api/` vs `/api/v1/`) and a model id with credits. The env
-   indirection IS the fallback plan — pointing `RESPAN_BASE_URL` at
+   indirection IS the fallback plan - pointing `RESPAN_BASE_URL` at
    OpenAI directly must keep everything working.
 3. Smoke test: tiny `internalAction` that runs `generateText` once; run it
    from the dashboard. Commit only after this passes.
 
-## Task 2 — Intent parsing (replace `fallbackParse` usage)
+## Task 2 - Intent parsing (replace `fallbackParse` usage)
 
 In `intel.processCommand`, call `generateObject` (Vercel AI SDK) with
-`schema: intentSchema` from `convex/lib/contracts.ts` — zod goes straight
+`schema: intentSchema` from `convex/lib/contracts.ts` - zod goes straight
 in. System prompt (keep to ~10 lines): you parse SAR coordinator commands;
 map colloquial place references to the `landmarks` list (pass the active
 case's landmark names + subject facts + the four profile keys as context);
-`minutesAgo` from phrases like "around 4pm" is approximate — prefer the
+`minutesAgo` from phrases like "around 4pm" is approximate - prefer the
 sim clock the user implies; anything you can't map → `{type: "unknown"}`.
-On ANY LLM error, fall back to `fallbackParse` (keep it — it's the demo's
+On ANY LLM error, fall back to `fallbackParse` (keep it - it's the demo's
 seatbelt) and still apply. `applyIntent` already dispatches; extend it:
 
 - `rerun_hypothesis` → schedule your Task 3 reasoning for that profile.
 - `query_status` → Task 4.
 
-## Task 3 — Hypothesis reasoning on the event clock
+## Task 3 - Hypothesis reasoning on the event clock
 
 Implement `onNewTip` (currently a no-op; it already receives every tip,
 scripted, typed, or spoken):
@@ -80,7 +80,7 @@ scripted, typed, or spoken):
    your own internal mutation. This is the "Respan judges tip
    credibility" pitch line.
 3. **Hypothesis agents:** create four Agent-component threads on first
-   run (store `threadId` on each hypothesis row — your mutation):
+   run (store `threadId` on each hypothesis row - your mutation):
    ```ts
    new Agent(components.agent, { name: "hypothesis-hiker",
      languageModel: respan.chat(MODEL), instructions: …profile blurb… })
@@ -89,7 +89,7 @@ scripted, typed, or spoken):
    (that's the sponsor-visible "persistent agent" surface). Per tip, ask
    each thread: given case facts, this tip (+ judge credibility), the tip
    history it remembers, and its profile's Koester priors
-   (`PROFILES[key]` — quote the actual numbers in the prompt), return
+   (`PROFILES[key]` - quote the actual numbers in the prompt), return
    structured `{weight: 0–1, reasoning: ≤2 sentences, mobilityKmH?,
    terrainAffinity?}` (`generateObject`; the thread keeps the prose).
 4. **Combine:** normalize the four weights to sum 1 (floor each at 0.02),
@@ -97,9 +97,9 @@ scripted, typed, or spoken):
    within ±50% of profile defaults, `updatedAt: Date.now()`). A's next
    tick consumes them blindly; B's panel flashes on `updatedAt`.
 
-Run the four thread calls with `Promise.all` — this is an action, you can.
+Run the four thread calls with `Promise.all` - this is an action, you can.
 
-## Task 4 — Status readback (`query_status`)
+## Task 4 - Status readback (`query_status`)
 
 Gather live state in `applyIntent`'s branch (top-3 hottest unsearched
 cells with their grid coords, team statuses, leading hypothesis + weight,
@@ -108,7 +108,7 @@ answer → `commands.response`. D's console displays (and may speak) it.
 LLM failure → template-string fallback from the same data. Never leave
 `response` empty.
 
-## Task 5 — Prove the loop, respect the budget
+## Task 5 - Prove the loop, respect the budget
 
 - Type into the console: "we saw someone near the north creek an hour
   ago" → tip lands with judged credibility, panel re-weights with fresh

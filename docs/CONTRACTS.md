@@ -1,4 +1,4 @@
-# CONTRACTS — read before writing code
+# CONTRACTS - read before writing code
 
 Four people build in parallel on four branches and merge in the final hour.
 This works only if the seams are frozen. This file is the seams.
@@ -6,7 +6,7 @@ This works only if the seams are frozen. This file is the seams.
 ## 1. File ownership
 
 Work ONLY in files you own. Creating new files inside your area is fine.
-Reading anyone's code is fine. Editing someone else's file is not — if you
+Reading anyone's code is fine. Editing someone else's file is not - if you
 need something changed there, ping its owner in the team chat.
 
 | Area | Files | Owner |
@@ -36,7 +36,7 @@ stub's internals; the signatures are the contract and do not change.
 ### Tips (C, D → A → C)
 - `tips.addTip` (public mutation, Person A's file) is the ONLY way a tip
   enters the system. C's intent dispatch and D's scripted drip both call it.
-- `addTip` schedules `internal.intel.onNewTip` — that is the **event
+- `addTip` schedules `internal.intel.onNewTip` - that is the **event
   clock**: LLM reasoning fires on tips and commands, NEVER per tick.
 - A's tick ages `tips.weight` (half-life `SIM.TIP_HALF_LIFE_SIM_MIN`).
   C owns `tips.credibility` (judge score, default 0.5). A consumes both.
@@ -48,13 +48,13 @@ stub's internals; the signatures are the contract and do not change.
 
 ### Commands (D → C → A)
 - Console submits raw text via `commands.submit` (C's file).
-- C parses to an `Intent` (`convex/lib/contracts.ts` — the FROZEN
+- C parses to an `Intent` (`convex/lib/contracts.ts` - the FROZEN
   vocabulary) and applies it via `intel.applyIntent`, which calls A's
-  mutations. C sets `commands.response` — the read-back D displays.
+  mutations. C sets `commands.response` - the read-back D displays.
 - New intent type needed → team decision, added to `contracts.ts` on `main`.
 
 ### Claims / contention (B → A)
-- Human claim: `teams.claimGrid` throws on a lost race — B shows the error
+- Human claim: `teams.claimGrid` throws on a lost race - B shows the error
   as a toast (that IS the demo beat, don't swallow it).
 - A's planner writes the same `grids.claimedBy` / `teams.assignedGridId`
   fields and must skip human-claimed cells.

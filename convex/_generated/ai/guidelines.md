@@ -159,14 +159,14 @@ export const listWithExtraArg = query({
 
 Note: `paginationOpts` is an object with the following properties:
 
-- `numItems`: the initial page-size target — not a guaranteed maximum under reactive pagination (the validator is `v.number()`)
+- `numItems`: the initial page-size target - not a guaranteed maximum under reactive pagination (the validator is `v.number()`)
 - `cursor`: the cursor to use to fetch the next page of documents; required (the validator is `v.union(v.string(), v.null())`)
 - `endCursor` (optional): bounds the page to end at a known cursor
 - `maximumRowsRead` (optional): limits how many rows the query may scan before returning a partial page
 - `maximumBytesRead` (optional): limits how many bytes the query may read before returning a partial page
 - `id` (optional): client-managed pagination metadata accepted by `paginationOptsValidator`
 
-Always validate pagination arguments with `paginationOptsValidator` and pass `args.paginationOpts` unchanged to `.paginate()` — do not reconstruct it field by field, or the optional fields lose their native behavior.
+Always validate pagination arguments with `paginationOptsValidator` and pass `args.paginationOpts` unchanged to `.paginate()` - do not reconstruct it field by field, or the optional fields lose their native behavior.
 
 A query that ends in `.paginate()` returns an object that has the following properties:
 
@@ -226,13 +226,13 @@ function App({ children }: { children: React.ReactNode }) {
 }
 ```
 
-The `useAuth` prop must return `{ isLoading, isAuthenticated, fetchAccessToken }`. Do NOT use plain `ConvexProvider` when authentication is needed — it will not send tokens with requests.
+The `useAuth` prop must return `{ isLoading, isAuthenticated, fetchAccessToken }`. Do NOT use plain `ConvexProvider` when authentication is needed - it will not send tokens with requests.
 
 ## Typescript guidelines
 
 - You can use the helper typescript type `Id` imported from './\_generated/dataModel' to get the type of the id for a given table. For example if there is a table called 'users' you can use `Id<'users'>` to get the type of the id for that table.
 - Use `Doc<"tableName">` from `./_generated/dataModel` to get the full document type for a table.
-- Use `QueryCtx`, `MutationCtx`, `ActionCtx` from `./_generated/server` for typing function contexts. NEVER use `any` for ctx parameters — always use the proper context type.
+- Use `QueryCtx`, `MutationCtx`, `ActionCtx` from `./_generated/server` for typing function contexts. NEVER use `any` for ctx parameters - always use the proper context type.
 - If you need to define a `Record` make sure that you correctly provide the type of the key and value in the type. For example a validator `v.record(v.id('users'), v.string())` would have the type `Record<Id<'users'>, string>`. Below is an example of using `Record` with an `Id` type in a query:
 
 ```ts

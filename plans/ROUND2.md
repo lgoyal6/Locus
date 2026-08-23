@@ -1,7 +1,7 @@
-# Round 2 — final hour, 7 parallel workstreams
+# Round 2 - final hour, 7 parallel workstreams
 
 One hour. Every workstream is scoped to ~30–45 min, creates NEW files
-wherever possible, and edits only the files its plan names — that's what
+wherever possible, and edits only the files its plan names - that's what
 makes a 7-way merge survivable. Schema changes are ALREADY on `main`
 (tips.embedding + vector index, tips.corroborates, cases.debrief): nobody
 touches `convex/schema.ts`, `convex/profiles.ts`, or `convex/lib/**`.
@@ -15,20 +15,20 @@ touches `convex/schema.ts`, `convex/profiles.ts`, or `convex/lib/**`.
 | `w5-debrief` | `plans/W5.md` | After-action debrief generated on "found" via the gateway | Respan |
 | `w6-presence` | `plans/W6.md` | Presence component: coordinators online | Convex |
 | `w7-deploy-demo` | `plans/W7.md` | Cloud deploy (Convex + Vercel), env, rehearsal, fallback recording | demo |
-| `w8-tip-attraction` | `plans/W8.md` | **BUG (top priority): tips must move probability mass + teams** — walker anchors | core |
+| `w8-tip-attraction` | `plans/W8.md` | **BUG (top priority): tips must move probability mass + teams** - walker anchors | core |
 | `w9-visual-polish` | `plans/W9.md` | App-shell visual pass (everything around the map) | demo |
 
 ## 7-person assignment (9 lanes, small ones bundled)
 
 | Person | Lanes | Note |
 |---|---|---|
-| P1 | **W8** | the bug fix — highest priority, merge FIRST |
+| P1 | **W8** | the bug fix - highest priority, merge FIRST |
 | P2 | W1 | vector corroboration (both sponsors) |
 | P3 | W4 | map legend + readability |
 | P4 | W9 | shell visual polish |
 | P5 | W2 + W3 | two small Convex checklist wins |
 | P6 | W5 | debrief (closing beat) |
-| P7 (Dat) | W7 | deploy + rehearsal — needs account access |
+| P7 (Dat) | W7 | deploy + rehearsal - needs account access |
 
 W6 (presence) is the cut line: first person finished grabs it; unstarted
 at T-15 = skipped. New merge order: **W8 → W1 → W2 → W3 → W4 → W5 → (W6)

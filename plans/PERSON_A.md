@@ -1,4 +1,4 @@
-# PERSON A — Simulation Core
+# PERSON A - Simulation Core
 
 **Mission:** replace the stub tick with the real engine: profile-biased
 Monte Carlo walker → probability heatmap → team movement & search → greedy
@@ -23,14 +23,14 @@ Global constraints (from CONTRACTS §4): one `simState` write per tick;
 grid rows patched only when they change; no LLM calls anywhere in your
 code; budget ≤ 600 walks × ≤ 96 steps; tick body must stay well under 1s.
 Use a seeded PRNG (mulberry32, seed = `tick * 2654435761 % 2^32`) so a
-given tick is reproducible when debugging — never `Math.random()`.
+given tick is reproducible when debugging - never `Math.random()`.
 
 ---
 
-## Task 1 — Walker module (`convex/simWalker.ts`, pure functions)
+## Task 1 - Walker module (`convex/simWalker.ts`, pure functions)
 
 Write `runWalks(caseDoc, hypotheses, tips, simClockMin, rng): number[][]`
-returning an UNNORMALIZED heatmap. Pure math, no ctx — unit-testable.
+returning an UNNORMALIZED heatmap. Pure math, no ctx - unit-testable.
 
 1. Build a terrain lookup once: `Map<"x,y", kind>` from
    `caseDoc.terrainCells`; missing = `"open"`.
@@ -47,12 +47,12 @@ returning an UNNORMALIZED heatmap. Pure math, no ctx — unit-testable.
      - `backtrack`: reverse heading (±180° ± 20°).
      - `randomWalk`: new uniform heading.
      - `routeTravel`: pick among 8 candidate bearings (heading + k·45°),
-       weighted by `h.terrainAffinity[kindOf(destination cell)]` — use
+       weighted by `h.terrainAffinity[kindOf(destination cell)]` - use
        affinity² for routeTravel so linear features really capture walks;
        plain affinity weighting for the direction chosen by randomWalk /
        directionTravel (i.e. terrain still nudges every moving behavior:
        compute destination for the chosen bearing, then accept it with
-       probability proportional to affinity vs. the best candidate —
+       probability proportional to affinity vs. the best candidate  - 
        one retry is enough, don't over-engineer).
    - Move via `movePoint`, clamp into bounds (reflect heading on hitting
      an edge). Track the walk's cell path tail (last 25% of steps).
@@ -65,13 +65,13 @@ returning an UNNORMALIZED heatmap. Pure math, no ctx — unit-testable.
    `h.weight * walkWeight * 1.0`; each tail cell gets
    `h.weight * walkWeight * 0.15`.
 5. Return the accumulated `number[gridSize][gridSize]` (`[y][x]`, SW
-   origin — use `latLngToCell` from `convex/lib/geo.ts`).
+   origin - use `latLngToCell` from `convex/lib/geo.ts`).
 
-Acceptance: with the stub scenario, log a few runs — probability mass
+Acceptance: with the stub scenario, log a few runs - probability mass
 should visibly hug the trail cells for the hiker hypothesis and stay
 tight for dementia/injured.
 
-## Task 2 — Real tick (`convex/sim.ts`, replace the stub body only)
+## Task 2 - Real tick (`convex/sim.ts`, replace the stub body only)
 
 Keep the query/`setRunning`/reschedule rails EXACTLY as they are. New body:
 
@@ -79,7 +79,7 @@ Keep the query/`setRunning`/reschedule rails EXACTLY as they are. New body:
    teams.
 2. Advance clock (as the stub does). Age tips:
    `weight = 0.5^(minutesSinceObserved / SIM.TIP_HALF_LIFE_SIM_MIN)` where
-   `minutesSinceObserved = simClockMin - observedAtSimMin` — recompute,
+   `minutesSinceObserved = simClockMin - observedAtSimMin` - recompute,
    patch a tip row only if it changed by > 0.05 (bounded writes).
 3. `radiusKm` = weighted mean over hypotheses of
    `min(p95Km, mobilityKmH * simClockMin / 60)` (percentiles from
@@ -90,12 +90,12 @@ Keep the query/`setRunning`/reschedule rails EXACTLY as they are. New body:
 6. Smooth (3×3 box, one pass) and normalize max → 1. Patch `simState`
    ONCE with `{tick, simClockMin, radiusKm, heatmap}`.
 7. Team movement & search (Task 3), planner (Task 4), found check (Task 5)
-   — all inside the same mutation, writes batched per changed row.
+   - all inside the same mutation, writes batched per changed row.
 
-## Task 3 — Team movement & search
+## Task 3 - Team movement & search
 
 Teams are simulated field units (the demo runs hands-off; humans can also
-claim manually via B's UI — same fields).
+claim manually via B's UI - same fields).
 
 - `enroute`: move `teamSpeedKmH (3) * minutesPerTick / 60` km toward the
   assigned cell center (`bearingDeg` + `movePoint`); on arrival (< 0.1 km)
@@ -103,15 +103,15 @@ claim manually via B's UI — same fields).
 - `searching`: after 2 consecutive ticks in the cell → mark the grid row
   `{searched: true, searchedAtTick: tick, claimedBy: undefined}`, team →
   `{status: "idle", assignedGridId: undefined}`.
-- Patch team rows every tick (positions change — that's fine, ~3 rows).
+- Patch team rows every tick (positions change - that's fine, ~3 rows).
 
-## Task 4 — Greedy planner (`convex/planner.ts`)
+## Task 4 - Greedy planner (`convex/planner.ts`)
 
 Implement `assignTeams(ctx, caseId, heatmap)` and call it from the tick:
 
 1. Candidates: unsearched, unclaimed cells.
    `score = heatmap[y][x] * (1 + 0.02 * ticksSinceLastSearchAnywhereNearby)`
-   — simplest honest staleness: `1 + 0.02 * (tick - (searchedAtTick of the
+   - simplest honest staleness: `1 + 0.02 * (tick - (searchedAtTick of the
    nearest searched cell, else 0))`; if that's fiddly, plain
    `score = heatmap[y][x]` first, staleness second.
 2. For each `idle` team, assign the highest-score cell, tie-broken by
@@ -121,14 +121,14 @@ Implement `assignTeams(ctx, caseId, heatmap)` and call it from the tick:
 3. Never reassign `enroute`/`searching` teams (stability beats optimality
    on stage).
 
-## Task 5 — Found check
+## Task 5 - Found check
 
 After search marking: if a newly searched cell ==
 `latLngToCell(bounds, gridSize, hiddenTrueLat, hiddenTrueLng)` →
 `simState.foundAtTick = tick`, `cases.status = "found"`, `running = false`.
 Do NOT reveal coordinates anywhere else. B renders the moment.
 
-## Task 6 — Verify the arc, then tune
+## Task 6 - Verify the arc, then tune
 
 Full run: seed → run → watch. Expected: heatmap blooms outward, hugs
 trails, tips (D's drip or console-typed "we saw her near the north creek")

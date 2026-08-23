@@ -18,16 +18,16 @@ This is decision support for trained searchers, not an autonomous finder.
 **Invariant: the LLM reasons, math does the searching, voice drives it.** LOCUS
 runs one active case over a square lat/lng grid, driven by two independent clocks:
 
-- **Fast clock** (`convex/sim.ts`, self-scheduling every 1.5s) — **pure math, zero LLM.**
+- **Fast clock** (`convex/sim.ts`, self-scheduling every 1.5s) - **pure math, zero LLM.**
   Ages tips, runs a seeded Monte-Carlo walker (`simWalker.ts`), suppresses searched
   cells, normalizes a probability heatmap, moves teams, checks for the hidden subject,
   and greedily assigns teams to high-probability cells (`planner.ts`).
-- **Event clock** (`convex/intel.ts`, fires only on new tips/commands, debounced 10s) —
+- **Event clock** (`convex/intel.ts`, fires only on new tips/commands, debounced 10s)  - 
   **all LLM reasoning.** Parses voice/console commands into typed intents, judges tip
   credibility, and re-weights four Koester lost-person hypotheses (hiker/dementia/child/
   injured), each an `@convex-dev/agent` with persistent thread memory.
 
-The React frontend is a single map-centric screen — a full-bleed Mapbox `MapView` with
+The React frontend is a single map-centric screen - a full-bleed Mapbox `MapView` with
 glassmorphism panels on top, fed entirely by push-based Convex subscriptions (never polls).
 The only two human inputs are **map clicks** (claim a grid cell for a team) and the
 **CommandConsole** (voice/typed commands).
@@ -86,7 +86,7 @@ flowchart TB
     class Intel,Agents,Corr event
 ```
 
-### Data model (`convex/schema.ts` — FROZEN)
+### Data model (`convex/schema.ts` - FROZEN)
 
 Root table is `cases`; everything references it via `caseId`. Grid convention: cell
 `(0,0)` = SW corner, heatmap indexed `[y][x]`, all cell↔lat/lng math goes through
@@ -104,14 +104,14 @@ Root table is `cases`; everything references it via `caseId`. Grid convention: c
 
 ### Module guide
 
-**Backend — fast clock:** `sim.ts` (tick loop, one `simState` write/tick, found-check) ·
+**Backend - fast clock:** `sim.ts` (tick loop, one `simState` write/tick, found-check) ·
 `simWalker.ts` (pure seeded Monte-Carlo from LKP + credible-tip anchors) · `planner.ts`
 (greedy team→cell, priority = heatmap × staleness).
-**Backend — event clock:** `intel.ts` (intent dispatch + `onNewTip` reasoning, 10s debounce,
+**Backend - event clock:** `intel.ts` (intent dispatch + `onNewTip` reasoning, 10s debounce,
 `fallbackParse` regex seatbelt) · `agents/` (single `client.ts` Respan gateway; 4 persistent
 hypothesis `Agent`s + intent/judge/status prompts) · `corroborate.ts` (tip embedding + vector
 corroboration) · `debrief.ts` (after-action report on found).
-**Backend — entrypoints:** `tips.addTip` (the **only** tip entrypoint) · `commands.submit` ·
+**Backend - entrypoints:** `tips.addTip` (the **only** tip entrypoint) · `commands.submit` ·
 `escalation.ts`+`crons.ts` (2-min coverage sweep, no LLM) · `cases.seedCase` · `teams.claimGrid`
 (transactional; a lost race throws → toast) · `scenario.ts` (Mt. Tam world + scripted tip drip) ·
 `photos.ts`, `presence.ts`.
@@ -133,7 +133,7 @@ corroboration) · `debrief.ts` (after-action report on found).
 ### Gotchas
 
 - **No LLM in the fast tick, ever.** LLM only on the event clock, debounced 10s.
-- `hiddenTrueLat/Lng` is demo ground truth — never rendered before `status==="found"`.
+- `hiddenTrueLat/Lng` is demo ground truth - never rendered before `status==="found"`.
 - **Pinned:** `ai@^6` + `@ai-sdk/openai@^3` (required by `@convex-dev/agent@0.6`); a plain
   `npm install` can silently restore `@ai-sdk/openai@4` and break every LLM call.
 - react-map-gl v8: import from `react-map-gl/mapbox`; click event is `MapMouseEvent`.
@@ -178,6 +178,6 @@ replaces its part of the stub.
 
 - Work ONLY in the files you own (`docs/CONTRACTS.md` §Ownership).
 - Commit small, push your branch often.
-- Never edit `convex/schema.ts`, `convex/profiles.ts`, `convex/lib/*` —
+- Never edit `convex/schema.ts`, `convex/profiles.ts`, `convex/lib/*`  - 
   schema/contract changes go through the whole team, immediately.
-- Feed your plan file to your AI assistant — it's written to be executed.
+- Feed your plan file to your AI assistant - it's written to be executed.
