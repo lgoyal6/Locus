@@ -153,6 +153,54 @@ corroboration) · `debrief.ts` (after-action report on found).
 ownership, the frozen interfaces, and the git protocol. `docs/PLAN.md` is
 the master plan.
 
+## How the picture re-plans
+
+A tip never edits the heatmap. It changes two inputs the fast clock reads on its
+next pass: the hypothesis weights, and the set of anchors the walker starts from.
+The two clocks never wait on each other, so the map keeps moving at 1.5s while an
+LLM call is still in flight.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant V as CommandConsole or scenario drip
+    participant T as tips.addTip
+    participant I as intel.ts, event clock
+    participant H as hypotheses rows
+    participant S as sim.tick, fast clock
+    participant M as MapView
+
+    V->>T: a sighting, via commands.submit or the scripted drip
+    T->>T: insert the tip at credibility 0.5, weight 1
+    T-)I: schedule onNewTip
+    T-)I: schedule corroborate.embedTip
+    Note over I: skipped entirely if another reasoning<br/>pass ran within the last 10s
+    I->>I: LLM judges credibility 0 to 1,<br/>keeps 0.5 if the call fails
+    I->>H: re-weight the four Koester hypotheses,<br/>normalized, floored at 0.02
+
+    loop every 1.5s, no LLM in here ever
+        S->>S: age every tip: weight halves every 120 sim-minutes
+        S->>S: anchors = last known point, plus any tip<br/>whose credibility times weight exceeds 0.2
+        S->>S: 150 Monte Carlo walks per hypothesis above weight 0.02,<br/>split across those anchors by anchor weight
+        S->>S: reweight each walk by how close its endpoint lands<br/>to tips above the 0.1 conditioning threshold
+        S->>S: deposit at the endpoint, plus 0.15 of that at each cell<br/>along the last quarter of the path
+        S->>S: multiply searched cells by 1 minus the probability of detection,<br/>box-smooth, rescale so the max cell is 1
+        S->>M: one simState write per tick: heatmap, tick, radiusKm
+        S->>S: walk teams toward their cells at 3 km/h. A team that has<br/>spent two consecutive ticks on a cell marks it searched
+        alt a cell searched this tick is the hidden true cell
+            S->>S: freeze the sim, set the case to found,<br/>schedule the debrief
+        else
+            S->>S: planner hands each idle team the best unsearched,<br/>unclaimed cell, priority = probability times staleness
+        end
+    end
+```
+
+Two thresholds do most of the work and are easy to confuse. A tip has to clear
+`credibility * weight > 0.2` before walks will *start* from it, but only
+`credibility * weight > 0.1` before it *bends* walks that end near it. A tip that
+the judge scored low, or an old tip that has aged out, keeps nudging the map long
+after it stopped being a place worth searching from.
+
 ## Getting started (each person, on their own machine)
 
 ```bash
@@ -173,6 +221,39 @@ Backend env (Person C only): `npx convex env set RESPAN_API_KEY …` etc.
 
 In the app: **Open demo case → Run.** The stub world ticks; your piece
 replaces its part of the stub.
+
+## Deploying it
+
+Two halves: Convex functions to a cloud deployment, Vite build to Vercel.
+`docs/DEPLOY.md` is the log of what was actually run and verified; this is the
+short version.
+
+```bash
+# 1. Convex functions to a cloud deployment (also rewrites .env.local)
+npx convex dev --once --configure new --project locus --dev-deployment cloud
+
+# 2. Backend env, set on the deployment itself, not in a file
+npx convex env set RESPAN_API_KEY <key>
+npx convex env set RESPAN_BASE_URL https://api.openai.com/v1
+
+# 3. Confirm the gateway answers from the cloud backend
+npx convex run intel:smokeTest        # expects "LOCUS gateway online."
+
+# 4. Frontend; Vite build is auto-detected, output dist/
+npx vercel --prod
+```
+
+Vercel needs two Production env vars: `VITE_CONVEX_URL`, pointing at the cloud
+deployment from step 1, and `VITE_MAPBOX_TOKEN`. Without the Mapbox token the
+map does not render.
+
+`RESPAN_BASE_URL` is `https://api.openai.com/v1` in the deployed build and
+`RESPAN_API_KEY` is an OpenAI key. The env indirection in
+`convex/agents/client.ts` makes that a pure config choice, so nothing in the code
+changes either way.
+
+`npx convex run scenario:resetDemo` works against the cloud deployment and is
+what you run between demo runs.
 
 ## Working agreement (the short version)
 
