@@ -100,6 +100,7 @@ export default function App() {
       <header className="glass-strong absolute inset-x-4 top-4 z-20 flex items-center justify-between gap-6 px-5 py-2">
         <div className="flex min-w-0 items-center gap-5">
           <Wordmark />
+          <a href="https://github.com/lgoyal6/Locus" target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs text-muted-foreground underline">GitHub</a>
           <div className="h-8 w-px shrink-0 bg-white/10" />
           <SubjectPhoto caseId={activeCase._id} />
           <div className="min-w-0">
