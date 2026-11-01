@@ -20,6 +20,7 @@ function Wordmark() {
       <h1 className="text-lg font-black leading-none tracking-[0.35em]">
         LOCUS<span className="text-primary">.</span>
       </h1>
+      <a href="/demo" className="text-xs underline">Try isolated sample</a>
       <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
         Search &amp; Rescue Command
       </span>
